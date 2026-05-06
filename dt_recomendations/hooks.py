@@ -31,6 +31,7 @@ app_license = "agpl-3.0"
 # include js, css files in header of web template
 # web_include_css = "/assets/dt_recomendations/css/dt_recomendations.css"
 # web_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
+web_include_js = ["/assets/dt_recomendations/js/homepage.js"]
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "dt_recomendations/public/scss/website"
@@ -140,6 +141,18 @@ app_license = "agpl-3.0"
 # 	}
 # }
 
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "dt_recomendations.events.purchase.on_invoice_submit"
+    },
+    "Payment Entry": {
+        "on_submit": "dt_recomendations.events.purchase.on_payment_submit"
+    },
+    "POS Invoice": {
+        "on_submit": "dt_recomendations.events.purchase.on_pos_invoice"
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
@@ -180,6 +193,16 @@ app_license = "agpl-3.0"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "dt_recomendations.event.get_events"
 # }
+
+override_whitelisted_methods = {
+    "webshop.webshop.doctype.wishlist.wishlist.add_to_wishlist":
+    "dt_recomendations.api.add_to_wishlist"
+}
+
+override_doctype_class = {
+    "Website Item": "dt_recomendations.overrides.website_item.CustomWebsiteItem"
+}
+
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

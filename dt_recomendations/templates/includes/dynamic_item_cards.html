@@ -1,0 +1,10 @@
+{% from "webshop/templates/includes/macros.html" import item_card %}
+
+{% for web_item in items %}
+    {{ item_card(
+        web_item,
+        is_featured=is_featured,
+        is_full_width=is_full_width,
+        align=align
+    ) }}
+{% endfor %}

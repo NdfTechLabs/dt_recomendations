@@ -1,0 +1,12 @@
+{% from "webshop/templates/includes/macros.html" import item_card %}
+
+{% extends "templates/web.html" %}
+{% block page_content %}
+   <h2>{{ title }}</h2>
+
+   <div class="row">
+       {% for item in items %}
+           {{ item_card(item, is_full_width=True, align="Center") }}
+       {% endfor %}
+   </div>
+{% endblock %}
