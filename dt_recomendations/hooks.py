@@ -29,7 +29,7 @@ app_license = "agpl-3.0"
 # app_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/dt_recomendations/css/dt_recomendations.css"
+web_include_css = "/assets/dt_recomendations/css/homepage.css"
 # web_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
 web_include_js = ["/assets/dt_recomendations/js/homepage.js"]
 

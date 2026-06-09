@@ -123,8 +123,6 @@ function buildPayload() {
 async function loadHomepageSections() {
     const sections = window.HOMEPAGE_SECTIONS || [];
 
-    console.log("Loading homepage sections", sections);
-
     if (!sections.length) {
         return;
     }
