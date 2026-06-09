@@ -43,8 +43,8 @@ class CustomWebsiteItem(WebsiteItem):
             if settings and settings.enable_recommendations:
                 recommended = get_similar_website_items(self.item_code, limit=6)
 
-            # attach to context
-            context.recommended_items = recommended
+                # attach to context
+                context.recommended_items = recommended
 
         except Exception as e:
             # fail silently (don’t break page)
