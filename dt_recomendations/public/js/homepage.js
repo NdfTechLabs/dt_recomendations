@@ -148,6 +148,10 @@ function renderSections(data) {
         if (!container) return;
 
         container.innerHTML = data[section_id];
+
+        if (typeof initProductCards === "function") {
+            initProductCards();
+        }
     });
 }
 

@@ -1,7 +1,8 @@
 import json
 import frappe
-
 from frappe.query_builder.functions import Sum
+
+from dt_ecommerce.utils import enrich_website_items
 
 def get_users_for_item(item_code):
     PI = frappe.qb.DocType("Product Interaction")
@@ -277,7 +278,7 @@ def map_to_website_items(item_codes):
 
     ordered = [mapping[c] for c in item_codes if c in mapping]
 
-    return ordered
+    return enrich_website_items(ordered)
 
 def get_homepage_data():
     groups = get_homepage_groups()
