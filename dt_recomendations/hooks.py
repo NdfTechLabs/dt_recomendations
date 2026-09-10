@@ -27,11 +27,11 @@ app_license = "agpl-3.0"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dt_recomendations/css/dt_recomendations.css"
 # app_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
-
+_V = "?v=2.4"
 # include js, css files in header of web template
-web_include_css = ["/assets/dt_recomendations/css/homepage.css"]
+web_include_css = ["/assets/dt_recomendations/css/homepage.css"+ _V]
 # web_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
-web_include_js = ["/assets/dt_recomendations/js/homepage.js"]
+web_include_js = ["/assets/dt_recomendations/js/homepage.js"+ _V]
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "dt_recomendations/public/scss/website"
