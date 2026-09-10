@@ -1,101 +1,4 @@
 
-// const SECTION_CONFIG = {
-//     trending_now: {
-//         source: "trending",
-//         limit: 6
-//     },
-//     best_sellers: {
-//         source: "best_sellers",
-//         limit: 6
-//     },
-//     for_you: {
-//         source: "recommended",
-//         limit: 6
-//     },
-//     category: {
-//         source: "category",
-//         value: "",
-//         limit: 6
-//     }
-// };
-
-// function buildPayload() {
-//     const staticSections = Object.keys(SECTION_CONFIG)
-//         .filter(id => id !== "category") // exclude base category template
-//         .filter(id => document.getElementById(id))
-//         .map(id => ({
-//             section_id: id,
-//             ...SECTION_CONFIG[id]
-//         }));
-
-//     const categorySections = getCategoryConfigs();
-
-//     return {
-//         sections: [
-//             ...staticSections,
-//             ...categorySections
-//         ]
-//     };
-// }
-
-
-// async function loadHomepageSections() {
-//     const payload = buildPayload();
-
-//     const res = await frappe.call({
-//         method: "dt_recomendations.api.get_dynamic_sections",
-//         args: { config: payload }
-//     });
-
-//     renderSections(res.message);
-// }
-
-// function renderSections(data) {
-    
-//     Object.keys(data).forEach(section_id => {
-//         const container = document.getElementById(section_id)?.querySelector(".row");
-
-//         if (!container) return;
-
-//         const items = data[section_id];
-
-//         container.innerHTML = items;
-//     });
-// }
-
-// function getSectionsOnPage() {
-//     return Object.keys(SECTION_CONFIG).filter(id =>
-//         document.getElementById(id)
-//     );
-// }
-
-// function getCategorySections() {
-//     return [...document.querySelectorAll(".category")];
-// }
-
-// function getCategoryConfigs() {
-//     const sections = getCategorySections();
-
-//     return sections.map(section => {
-//         const id = section.id;
-
-//         if (!id) return null;
-
-//         // find inner element with data-item-group
-//         const inner = section.querySelector("[data-item-group]");
-//         const value = inner?.dataset.itemGroup;
-
-//         if (!value) return null;
-
-//         return {
-//             section_id: id,
-//             source: "category",
-//             value: value,
-//             limit: 6
-//         };
-//     }).filter(Boolean);
-// }
-
 const SECTION_CONFIG = {};
 
 (window.HOMEPAGE_SECTIONS || []).forEach(section => {
@@ -127,6 +30,34 @@ async function loadHomepageSections() {
         return;
     }
 
+    const cacheKey = "homepage_dynamic_sections";
+    const cacheDuration = 330 * 1000; // 5.5 minutes
+
+    const cached = sessionStorage.getItem(cacheKey);
+
+    if (cached) {
+        try {
+            const cacheData = JSON.parse(cached);
+
+            const age = Date.now() - cacheData.timestamp;
+
+            if (age < cacheDuration) {
+                renderSections(
+                    cacheData.data.groups || [],
+                    cacheData.data.settings
+                );
+
+                return;
+            }
+
+            // Expired
+            sessionStorage.removeItem(cacheKey);
+
+        } catch (e) {
+            sessionStorage.removeItem(cacheKey);
+        }
+    }
+
     const res = await frappe.call({
         method: "dt_recomendations.api.get_dynamic_sections",
         args: {
@@ -135,26 +66,40 @@ async function loadHomepageSections() {
             }
         }
     });
-
-    renderSections(res.message || {});
+    response = res.message || {};
+    sessionStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+            timestamp: Date.now(),
+            data: response
+        })
+    );
+    renderSections(response.groups || {}, response.settings);;
 }
 
-function renderSections(data) {
-    Object.keys(data).forEach(section_id => {
+function renderSections(groups, settings) {
+
+    groups.forEach(group => {
+
         const container = document
-            .getElementById(section_id)
+            .getElementById(group.section_id)
             ?.querySelector(".row");
 
         if (!container) return;
 
-        container.innerHTML = data[section_id];
+        new webshop.ProductGrid({
+            items: group.items,
+            settings: settings,
+            products_section: $(container),
+            preference: "Grid View"
+        });
 
-        if (typeof initProductCards === "function") {
-            initProductCards();
-        }
     });
 }
 
 frappe.ready(function () {
+    // Bind once
+    webshop.webshop.wishlist.bind_wishlist_action();
+    webshop.webshop.shopping_cart.bind_add_to_cart_action();
     loadHomepageSections();
 });

@@ -34,7 +34,6 @@ class CustomWebsiteItem(WebsiteItem):
                     source="web",
                     session_id=frappe.local.session.sid if hasattr(frappe.local, "session") else None
                 )
-
         # -------------------------------
         # 2. RECOMMENDATIONS (NEW)
         # -------------------------------
@@ -50,5 +49,4 @@ class CustomWebsiteItem(WebsiteItem):
             # fail silently (don’t break page)
             frappe.log_error(frappe.get_traceback(), "Recommendation Error")
             context.recommended_items = []
-
         return context

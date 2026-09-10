@@ -153,6 +153,52 @@ def get_homepage_groups(limit_per_group=6):
         "by_category": get_category_groups(limit_per_group)
     }
 
+
+def get_items_for_offer(promotion_name, limit=6):
+    promotion = frappe.get_doc("Promotional Scheme", promotion_name)
+
+    return [
+        row.item_code
+        for row in promotion.items
+        if row.item_code
+    ][:limit]
+
+def get_items_for_promotion(campaign_name, limit=6):
+
+    rules = frappe.get_all(
+        "Pricing Rule",
+        filters={
+            "applicable_for": "Campaign",
+            "campaign": campaign_name,
+            "disable": 0,
+        },
+        fields=["name"],
+    )
+
+    item_codes = []
+
+    for rule in rules:
+        items = frappe.get_all(
+            "Pricing Rule Item Code",
+            filters={
+                "parent": rule.name,
+                "parenttype": "Pricing Rule",
+            },
+            fields=["item_code"],
+            order_by="idx asc",
+        )
+
+        item_codes.extend(
+            row.item_code
+            for row in items
+            if row.item_code
+        )
+
+    # Remove duplicates while preserving order
+    item_codes = list(dict.fromkeys(item_codes))
+
+    return item_codes[:limit]
+
 def get_trending_items(limit=6):
     PI = frappe.qb.DocType("Product Interaction")
 
@@ -251,10 +297,11 @@ def get_category_groups(limit=4):
     return grouped
 
 def map_to_website_items(item_codes):
+
     if not item_codes:
         return []
 
-    # 🔥 fetch only fields required by item_card macro
+    # Fetch Website Item data
     results = frappe.get_all(
         "Website Item",
         filters={
@@ -262,22 +309,36 @@ def map_to_website_items(item_codes):
             "published": 1
         },
         fields=[
+            "name",
             "item_code",
+            "item_name",
             "web_item_name",
             "route",
             "website_image",
-            "item_group"
+            "item_group",
+            "has_variants",
+            "short_description",
+            "web_long_description",
+            "on_backorder",
         ]
     )
 
     if not results:
         return []
 
-    # 🔥 preserve ranking
-    mapping = {r["item_code"]: r for r in results}
+    # Preserve the ranking/order returned by resolve_section()
+    mapping = {
+        item["item_code"]: item
+        for item in results
+    }
 
-    ordered = [mapping[c] for c in item_codes if c in mapping]
+    ordered = [
+        mapping[c]
+        for c in item_codes
+        if c in mapping
+    ]
 
+    # Enrich items with information required by ProductGrid
     return enrich_website_items(ordered)
 
 def get_homepage_data():
@@ -315,7 +376,9 @@ def get_items_for_category(category, limit=6):
     return [r.product for r in results]
 
 def resolve_section(section, limit_override=None):
+
     source = section.get("source")
+    value = section.get("value")
     limit = limit_override or section.get("limit", 6)
 
     if source == "trending":
@@ -328,8 +391,13 @@ def resolve_section(section, limit_override=None):
         return get_personalized_items(limit)
 
     elif source == "category":
-        category = section.get("value")
-        return get_items_for_category(category, limit)
+        return get_items_for_category(value, limit)
+
+    elif source == "offer":
+        return get_items_for_offer(value, limit)
+
+    elif source == "promotion":
+        return get_items_for_promotion(value, limit)
 
     return []
 

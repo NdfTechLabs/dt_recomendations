@@ -1,5 +1,6 @@
 # dt_recommendations/api.py
 
+import hashlib
 import json
 from typing import Any
 
@@ -45,29 +46,52 @@ def log_search_click(item_code: str, query:str|None=None):
     )
 
 @frappe.whitelist(allow_guest=True)
-def get_dynamic_sections(config: str|dict):
+def get_dynamic_sections(config: str | dict):
     config = json.loads(config) if isinstance(config, str) else config
 
-    output = {}
+    config_json = json.dumps(config, sort_keys=True)
+    cache_key = "homepage_dynamic_sections:" + hashlib.md5(
+        config_json.encode("utf-8")
+    ).hexdigest()[:16]
+
+    cached = frappe.cache().get_value(cache_key)
+
+    if cached:
+        return cached
+
+    # Fetch Webshop Settings
+    webshop_settings = frappe.get_single("Webshop Settings")
+
+    settings = {
+        "enabled": webshop_settings.enabled,
+        "enable_wishlist": webshop_settings.enable_wishlist,
+        "show_stock_availability": webshop_settings.show_stock_availability,
+        "allow_items_not_in_stock": webshop_settings.allow_items_not_in_stock,
+        "enable_checkout": webshop_settings.enable_checkout,
+    }
+
+    groups = []
 
     for section in config.get("sections", []):
-        section_id = section.get("section_id")
-
         item_codes = resolve_section(section)
-
         website_items = map_to_website_items(item_codes)
-        # 4. Render item_card HTML
-        html = render_template(
-            "dt_recomendations/templates/includes/dynamic_item_cards.html",
-            {
-                "items": website_items,  # full list
-                "is_featured": 0,
-                "is_full_width": True,
-                "align": "Center"
-            }
-        )
 
-        output[section_id] = html
+        groups.append({
+            "section_id": section.get("section_id"),
+            "item_group": section.get("value"),
+            "title": section.get("title"),
+            "limit": section.get("limit", 6),
+            "items": website_items,
+        })
 
-    return output
+    response = {
+        "settings": settings,
+        "groups": groups,
+    }
+    frappe.cache().set_value(
+        cache_key,
+        response,
+        expires_in_sec=300
+    )
+    return response
 
