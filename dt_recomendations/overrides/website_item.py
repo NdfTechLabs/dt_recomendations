@@ -1,5 +1,7 @@
 # dt_recommendations/overrides/website_item.py
 
+import json
+
 from webshop.webshop.doctype.website_item.website_item import WebsiteItem
 from dt_recomendations.utils.interactions import log_interaction
 import frappe
@@ -49,4 +51,11 @@ class CustomWebsiteItem(WebsiteItem):
             # fail silently (don’t break page)
             frappe.log_error(frappe.get_traceback(), "Recommendation Error")
             context.recommended_items = []
+        shopping_cart = context["shopping_cart"].copy()
+
+        cart_settings = shopping_cart.pop("cart_settings", None)
+
+        context.shopping_cart_json = frappe.as_json(shopping_cart)
+        context.cart_settings_json = frappe.as_json(cart_settings.as_dict())
+        context.web_item_name_json = frappe.as_json(context.doc.web_item_name)
         return context
