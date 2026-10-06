@@ -14,13 +14,23 @@ class ProductInteraction(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		interaction_type: DF.Literal["view", "wishlist", "purchase_intent", "purchase", "search_click"]
+		filter_data: DF.JSON | None
+		interaction_type: DF.Literal["view", "wishlist", "purchase_intent", "purchase", "search_click", "catalog_view", "catalog_search", "catalog_filter"]
+		is_guest: DF.Check
 		name: DF.Int | None
-		product: DF.Link
+		page_route: DF.Data | None
+		product: DF.Link | None
+		search_query: DF.Data | None
 		session_id: DF.Data | None
 		source: DF.Data | None
 		timestamp: DF.Datetime | None
-		user: DF.Link
+		user: DF.Link | None
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_data: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
+		visitor_id: DF.Data | None
 		weight: DF.Float
 	# end: auto-generated types
 

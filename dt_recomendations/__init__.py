@@ -1,1 +1,1 @@
-__version__ = "1.0.9" # fix: Use dalali product to render product details in recommendations
+__version__ = "1.0.10" # chore: extend the properties in product interactions 

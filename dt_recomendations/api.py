@@ -18,7 +18,6 @@ from .recommender.engine import resolve_section, map_to_website_items
 def add_to_wishlist(item_code: str):
     # Call original logic first
     result = original_add(item_code)
-
     # Log interaction AFTER successful insert
     log_interaction(
         user=frappe.session.user,
@@ -32,17 +31,36 @@ def add_to_wishlist(item_code: str):
 
 
 @frappe.whitelist(allow_guest=True)
-def log_search_click(item_code: str, query:str|None=None):
-    user = frappe.session.user
+@frappe.whitelist(allow_guest=True)
+def log_catalog_interaction(
+    action,
+    query=None,
+    filters=None,
+):
+    if isinstance(filters, str):
+        filters = frappe.parse_json(filters)
 
-    if user == "Guest":
+    filters = filters or {}
+
+    log_interaction(
+        interaction_type=action,
+        source="catalog",
+        search_query=query,
+        page_route="/catalog",
+        filter_data=filters,
+    )
+
+
+@frappe.whitelist(allow_guest=True)
+def log_search_click(item_code: str, query: str | None = None):
+    if not item_code:
         return
 
     log_interaction(
-        user=user,
         product=item_code,
         interaction_type="search_click",
-        source="search"
+        source="search",
+        search_query=query,
     )
 
 @frappe.whitelist(allow_guest=True)

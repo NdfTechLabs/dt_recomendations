@@ -27,15 +27,14 @@ class CustomWebsiteItem(WebsiteItem):
         # -------------------------------
         # 1. VIEW LOGGING (unchanged)
         # -------------------------------
-        if frappe.session.user != "Guest":
-            if not viewed_recently(frappe.session.user, self.item_code):
-                log_interaction(
-                    user=frappe.session.user,
-                    product=self.item_code,
-                    interaction_type="view",
-                    source="web",
-                    session_id=frappe.local.session.sid if hasattr(frappe.local, "session") else None
-                )
+        if not viewed_recently(frappe.session.user, self.item_code):
+            log_interaction(
+                user=frappe.session.user,
+                product=self.item_code,
+                interaction_type="view",
+                source="web",
+                session_id=frappe.local.session.sid if hasattr(frappe.local, "session") else None
+            )
         # -------------------------------
         # 2. RECOMMENDATIONS (NEW)
         # -------------------------------

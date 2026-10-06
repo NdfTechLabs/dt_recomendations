@@ -7,12 +7,22 @@
  "engine": "InnoDB",
  "field_order": [
   "user",
+  "visitor_id",
+  "session_id",
+  "is_guest",
   "product",
   "interaction_type",
+  "search_query",
+  "page_route",
   "weight",
   "timestamp",
-  "session_id",
-  "source"
+  "source",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_data",
+  "filter_data"
  ],
  "fields": [
   {
@@ -20,23 +30,21 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "User",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   },
   {
    "fieldname": "product",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Product",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "interaction_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Interaction Type",
-   "options": "view\nwishlist\npurchase_intent\npurchase\nsearch_click",
+   "options": "view\nwishlist\npurchase_intent\npurchase\nsearch_click\ncatalog_view\ncatalog_search\ncatalog_filter",
    "reqd": 1
   },
   {
@@ -55,15 +63,69 @@
    "label": "Session Id"
   },
   {
+   "fieldname": "visitor_id",
+   "fieldtype": "Data",
+   "label": "Visitor Id"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_guest",
+   "fieldtype": "Check",
+   "label": "Is Guest"
+  },
+  {
+   "fieldname": "search_query",
+   "fieldtype": "Data",
+   "label": "Search Query"
+  },
+  {
+   "fieldname": "page_route",
+   "fieldtype": "Data",
+   "label": "Page Route"
+  },
+  {
+   "fieldname": "utm_source",
+   "fieldtype": "Link",
+   "label": "UTM Source",
+   "options": "UTM Source"
+  },
+  {
+   "fieldname": "utm_medium",
+   "fieldtype": "Link",
+   "label": "Medium",
+   "options": "UTM Medium"
+  },
+  {
+   "fieldname": "utm_campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "options": "UTM Campaign"
+  },
+  {
+   "fieldname": "utm_content",
+   "fieldtype": "Data",
+   "label": "Content"
+  },
+  {
+   "fieldname": "utm_data",
+   "fieldtype": "Data",
+   "label": "Term"
+  },
+  {
    "fieldname": "source",
    "fieldtype": "Data",
-   "label": "source"
+   "label": "Source"
+  },
+  {
+   "fieldname": "filter_data",
+   "fieldtype": "JSON",
+   "label": "Filter Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-24 06:08:55.521451",
+ "modified": "2026-10-06 15:19:01.781498",
  "modified_by": "Administrator",
  "module": "Dt Recomendations",
  "name": "Product Interaction",

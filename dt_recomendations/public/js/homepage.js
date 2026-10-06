@@ -97,9 +97,175 @@ function renderSections(groups, settings) {
     });
 }
 
+window.trackSearchClick = function (itemEl) {
+    const link = itemEl.closest("a");
+
+    if (!link) return;
+
+    // Prevent attaching the same listener more than once
+    if (link.dataset.searchTrackingAttached === "1") {
+        return;
+    }
+
+    link.dataset.searchTrackingAttached = "1";
+
+    link.addEventListener("click", () => {
+        const item_code = link.dataset.itemCode;
+
+        if (!item_code) return;
+
+        const query =
+            document.querySelector(".dt-search")?.value || null;
+
+        fetch("/api/method/dt_recomendations.api.log_search_click", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": frappe.csrf_token
+            },
+            body: JSON.stringify({
+                item_code,
+                query
+            }),
+            keepalive: true
+        });
+    });
+};
+
+function attachCatalogSearchTracking() {
+    const form = document.querySelector("#dalali-search-form");
+
+    if (!form) {
+        return;
+    }
+
+    if (form.dataset.searchTrackingAttached === "1") {
+        return;
+    }
+
+    form.dataset.searchTrackingAttached = "1";
+
+    form.addEventListener("submit", (event) => {
+        const formData = new FormData(form);
+
+        // Search text is stored separately
+        const query = formData.get("search")?.trim() || null;
+
+        // Everything else becomes catalog filter state
+        const filters = {};
+
+        for (const [key, value] of formData.entries()) {
+            if (key === "search") {
+                continue;
+            }
+
+            if (!value) {
+                continue;
+            }
+
+            // Support fields that can have multiple values
+            if (key in filters) {
+                if (!Array.isArray(filters[key])) {
+                    filters[key] = [filters[key]];
+                }
+
+                filters[key].push(value);
+            } else {
+                filters[key] = value;
+            }
+        }
+
+        // Determine what caused the submission
+        const submitter = event.submitter;
+
+        const action =
+            submitter?.dataset.catalogAction ||
+            "catalog_search";
+
+        fetch("/api/method/dt_recomendations.api.log_catalog_interaction", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": frappe.csrf_token
+            },
+
+            body: JSON.stringify({
+                action,
+                query,
+                filters
+            }),
+
+            keepalive: true
+        });
+    });
+}
+
+function attachCatalogFilterTracking() {
+    const form = document.querySelector("#dalali-sidebar-form");
+    if (!form) {
+        return;
+    }
+    
+    if (form.dataset.filterTrackingAttached === "1") {
+        return;
+    }
+
+    form.dataset.filterTrackingAttached = "1";
+
+    form.addEventListener("submit", () => {
+        const formData = new FormData(form);
+
+        const query = formData.get("search")?.trim() || null;
+
+        const filters = {};
+
+        for (const [key, value] of formData.entries()) {
+            if (key === "search") {
+                continue;
+            }
+
+            if (!value) {
+                continue;
+            }
+
+            // Support fields such as brands[]
+            // that can occur multiple times.
+            if (key in filters) {
+                if (!Array.isArray(filters[key])) {
+                    filters[key] = [filters[key]];
+                }
+
+                filters[key].push(value);
+            } else {
+                filters[key] = value;
+            }
+        }
+
+        fetch("/api/method/dt_recomendations.api.log_catalog_interaction", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": frappe.csrf_token
+            },
+
+            body: JSON.stringify({
+                action: "catalog_filter",
+                query,
+                filters
+            }),
+
+            keepalive: true
+        });
+    });
+}
+
 frappe.ready(function () {
     // Bind once
     webshop.webshop.wishlist.bind_wishlist_action();
     webshop.webshop.shopping_cart.bind_add_to_cart_action();
     loadHomepageSections();
+    attachCatalogSearchTracking();
+    attachCatalogFilterTracking();
 });
