@@ -27,7 +27,7 @@ app_license = "agpl-3.0"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dt_recomendations/css/dt_recomendations.css"
 # app_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
-_V = "?v=2.5"
+_V = "?v=2.6"
 # include js, css files in header of web template
 web_include_css = ["/assets/dt_recomendations/css/homepage.css"+ _V]
 # web_include_js = "/assets/dt_recomendations/js/dt_recomendations.js"
@@ -173,6 +173,14 @@ doc_events = {
 # 		"dt_recomendations.tasks.monthly"
 # 	],
 # }
+
+scheduler_events = {
+    "cron": {
+        "0 * * * *": [
+            "dt_recomendations.ranking.calculate_product_rankings"
+        ]
+    }
+}
 
 # Testing
 # -------
